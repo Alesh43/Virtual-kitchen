@@ -1,0 +1,143 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block title %}
+<title>E-commerce - ProductPage</title>
+{% endblock%}
+
+{% block main_content %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <meta charset="UTF-8">
+    <style>
+        .rating-list li {
+          float: right;
+          color: #ddd;
+          padding: 10px 5px;
+        }
+    
+        .rating-list li:hover,
+        .rating-list li:hover ~ li {
+          color: orange;
+        }
+    
+        .rating-list {
+          display: inline-block;
+          list-style: none;
+        }
+        .checked {
+            color: orange;
+        }
+    </style>
+</head>
+
+<!-- card start -->
+<div class="container">
+    <div class="d-flex mt-3">
+        <div class="col-md-4">
+            <img src="/{{products.image}}" alt="{{products.product_name}}" width="500">
+
+        </div>
+        <div class="offset-md-2 col-md-6 shadow">
+            <h2 class="text-muted text-center">{{products.product_name}}</h2>
+            <h2 class="text-center">Rs. {{products.product_price}}</h2>
+            <h3 class="text-center">Available Quantity : {{products.stock}}</h3>
+            <p class="text-center"><b>Category: {{products.category}}</b></p>
+            <p class="text-muted text-center">{{products.description}}</p>
+            <center>
+                <a href="/products/add_to_cart/{{products.id}}" class="btn btn-success" >Add To Cart</a>
+            </center>
+
+            <h5 class="card-title">rating:
+                <span class="fa fa-star {% if products.average_rating > 0 %} checked {% endif %}"></span>
+                <span class="fa fa-star {% if products.average_rating > 1 %} checked {% endif %}"></span>
+                <span class="fa fa-star {% if products.average_rating > 2 %} checked {% endif %}"></span>
+                <span class="fa fa-star {% if products.average_rating > 3 %} checked {% endif %}" ></span>
+                <span class="fa fa-star {% if products.average_rating > 4 %} checked {% endif %}"></span>
+            </h5>
+
+
+
+  {%if order_status%}
+  <ul class="btn btn-light list-inline rating-list">
+                <li onclick="rate(5, {{ products.id }})">
+                    <i class="fa fa-star {% if products.user_rating > 4 %} checked {% endif %}" title="Rate 5"></i>
+                </li>
+                <li onclick="rate(4, {{ products.id }})">
+                    <i class="fa fa-star {% if products.user_rating > 3 %} checked {% endif %}" title="Rate 4"></i>
+                </li>
+                <li onclick="rate(3, {{ products.id }})">
+                    <i class="fa fa-star {% if products.user_rating > 2 %} checked {% endif %}" title="Rate 3"></i>
+                </li>
+                <li onclick="rate(2, {{ products.id }})">
+                    <i class="fa fa-star {% if products.user_rating > 1 %} checked {% endif %}" title="Rate 2"></i>
+                </li>
+                <li onclick="rate(1, {{ products.id }})">
+                    <i class="fa fa-star {% if products.user_rating > 0 %} checked {% endif %}" title="Rate 1"></i>
+                </li>
+            </ul>
+
+            
+            
+     {%endif%}
+
+
+            <div class="container">
+                <h4 class="text-center">Comments:</h4>
+                
+                <form action="{% url 'users:add_reviews' product_id=products.id %}" method="POST" class="mb-3">
+                  {% csrf_token %}
+                  <div class="row">
+                    <div class="col-sm-8">
+                      <input type="text" name="review" class="form-control" placeholder="Enter Your Review">
+                      <input type="hidden" name="product" class="form-control" value="{{products.product_id}}">
+                    </div>
+                    <div class="col-sm-4">
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                  </div>
+                </form>
+            
+                {% for review in reviews %}
+                <div class="main-reviews card mb-3" style="border-radius: 20px;
+                background: rgb(48,61,58);
+                color: #fff;">
+                  <div class="card-body" style="padding: 0 20px;">
+                    <div class="user_details" style="display: flex; border-bottom: 1px solid rgb(255, 255, 255); align-items: center;">
+                      <h5 class="mr-3 ">{{ review.user.username }} </h5>
+                      <p class="mt-2">{{ review.posted_on }}</p>
+                    </div>
+                      <p class="mt-2">{{ review.review }}</p>
+                  </div>
+                </div>
+                {% empty %}
+                    <h5>No reviews yet...</h5>
+                {% endfor %}
+                
+              </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- card end -->
+
+<script>
+    const rate = (rating, products_id) => {
+        fetch(`/rate/${products_id}/${rating}/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(rest => {
+            window.location.reload();
+            // you may want to update the rating here
+            // to simplify stuff, I just reload the page
+        })
+    }
+
+  </script>
+
+{% endblock%}
